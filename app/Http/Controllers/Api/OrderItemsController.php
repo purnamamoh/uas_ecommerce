@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\Helpers\ApiFormatter;
 use Throwable;
 
-class OrderItemController extends Controller
+class OrderItemsController extends Controller
 {
     /**
      * Menampilkan semua data order item.
