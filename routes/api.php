@@ -32,10 +32,10 @@ Route::middleware('auth:api')->group(function () {
     Route::prefix('products')->group(function () {
         Route::get('/', [ProductController::class, 'index']);
         Route::post('/', [ProductController::class, 'store']);
-        Route::get('/{id}', [ProductController::class, 'detail']);
+        Route::get('/{id}', [ProductController::class, 'show']);
         Route::put('/{id}', [ProductController::class, 'update']);
         Route::patch('/{id}', [ProductController::class, 'patch']);
-        Route::delete('/{id}', [ProductController::class, 'delete']);
+        Route::delete('/{id}', [ProductController::class, 'destroy']);
 
         // Semua order item yang menggunakan product ini
         Route::get('/{id}/order-items', [ProductController::class, 'orderItems']);
@@ -48,15 +48,15 @@ Route::middleware('auth:api')->group(function () {
     */
 
     Route::prefix('orders')->group(function () {
-        Route::get('/', [OrderController::class, 'index']);
-        Route::post('/', [OrderController::class, 'store']);
-        Route::get('/{id}', [OrderController::class, 'detail']);
-        Route::put('/{id}', [OrderController::class, 'update']);
-        Route::patch('/{id}', [OrderController::class, 'patch']);
-        Route::delete('/{id}', [OrderController::class, 'delete']);
 
-        // Detail item dari sebuah order
-        Route::get('/{id}/items', [OrderController::class, 'orderItems']);
+    // Customer & Admin
+    Route::get('/', [OrderController::class, 'index']);
+    Route::post('/', [OrderController::class, 'store']);
+    Route::get('/{id}', [OrderController::class, 'show']);
+
+    // Update status order
+    Route::patch('/{id}/status', [OrderController::class, 'updateStatus']);
+
     });
 
     /*
@@ -67,11 +67,11 @@ Route::middleware('auth:api')->group(function () {
 
     Route::prefix('order-items')->group(function () {
         Route::get('/', [OrderItemsController::class, 'index']);
-        Route::post('/', [OrderItemsController::class, 'store']);
-        Route::get('/{id}', [OrderItemsController::class, 'detail']);
-        Route::put('/{id}', [OrderItemsController::class, 'update']);
-        Route::patch('/{id}', [OrderItemsController::class, 'patch']);
-        Route::delete('/{id}', [OrderItemsController::class, 'delete']);
+        // Route::post('/', [OrderItemsController::class, 'store']);
+        Route::get('/{id}', [OrderItemsController::class, 'show']);
+        // Route::put('/{id}', [OrderItemsController::class, 'update']);
+        // Route::patch('/{id}', [OrderItemsController::class, 'patch']);
+        // Route::delete('/{id}', [OrderItemsController::class, 'destroy']);
     });
 
 });
