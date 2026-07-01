@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use App\Models\OrderItemModel;
 use Illuminate\Http\Request;
+use App\Helpers\ApiFormatter;
+use Throwable;
 
 class OrderItemController extends Controller
 {
@@ -12,13 +15,21 @@ class OrderItemController extends Controller
      */
     public function index()
     {
-        $orderItems = OrderItemModel::with(['order', 'product'])->get();
+        try {
+            $orderItems = OrderItemModel::with(['order', 'product'])->get();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Data order item berhasil diambil.',
-            'data' => $orderItems
-        ]);
+            return ApiFormatter::createJson(
+                200,
+                'Data order item berhasil diambil.',
+                $orderItems
+            );
+        } catch (Throwable $e) {
+            return ApiFormatter::createJson(
+                500,
+                'Internal Server Error',
+                ['error' => $e->getMessage()]
+            );
+        }
     }
 
     /**
@@ -26,20 +37,28 @@ class OrderItemController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'order_id' => 'required|exists:orders,id',
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
-            'price_per_item' => 'required|integer|min:0',
-        ]);
+        try {
+            $validated = $request->validate([
+                'order_id' => 'required|exists:orders,id',
+                'product_id' => 'required|exists:products,id',
+                'quantity' => 'required|integer|min:1',
+                'price_per_item' => 'required|integer|min:0',
+            ]);
 
-        $orderItem = OrderItemModel::create($validated);
+            $orderItem = OrderItemModel::create($validated);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Order item berhasil ditambahkan.',
-            'data' => $orderItem
-        ], 201);
+            return ApiFormatter::createJson(
+                201,
+                'Order item berhasil ditambahkan.',
+                $orderItem
+            );
+        } catch (Throwable $e) {
+            return ApiFormatter::createJson(
+                500,
+                'Internal Server Error',
+                ['error' => $e->getMessage()]
+            );
+        }
     }
 
     /**
@@ -47,19 +66,29 @@ class OrderItemController extends Controller
      */
     public function show($id)
     {
-        $orderItem = OrderItemModel::with(['order', 'product'])->find($id);
+        try {
+            $orderItem = OrderItemModel::with(['order', 'product'])->find($id);
 
-        if (!$orderItem) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Order item tidak ditemukan.'
-            ], 404);
+            if (!$orderItem) {
+                return ApiFormatter::createJson(
+                    404,
+                    'Not Found',
+                    'Order item tidak ditemukan.'
+                );
+            }
+
+            return ApiFormatter::createJson(
+                200,
+                'Detail Order Item',
+                $orderItem
+            );
+        } catch (Throwable $e) {
+            return ApiFormatter::createJson(
+                500,
+                'Internal Server Error',
+                ['error' => $e->getMessage()]
+            );
         }
-
-        return response()->json([
-            'success' => true,
-            'data' => $orderItem
-        ]);
     }
 
     /**
@@ -67,29 +96,38 @@ class OrderItemController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $orderItem = OrderItemModel::find($id);
+        try {
+            $orderItem = OrderItemModel::find($id);
 
-        if (!$orderItem) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Order item tidak ditemukan.'
-            ], 404);
+            if (!$orderItem) {
+                return ApiFormatter::createJson(
+                    404,
+                    'Not Found',
+                    'Order item tidak ditemukan.'
+                );
+            }
+
+            $validated = $request->validate([
+                'order_id' => 'required|exists:orders,id',
+                'product_id' => 'required|exists:products,id',
+                'quantity' => 'required|integer|min:1',
+                'price_per_item' => 'required|integer|min:0',
+            ]);
+
+            $orderItem->update($validated);
+
+            return ApiFormatter::createJson(
+                200,
+                'Order item berhasil diperbarui.',
+                $orderItem
+            );
+        } catch (Throwable $e) {
+            return ApiFormatter::createJson(
+                500,
+                'Internal Server Error',
+                ['error' => $e->getMessage()]
+            );
         }
-
-        $validated = $request->validate([
-            'order_id' => 'required|exists:orders,id',
-            'product_id' => 'required|exists:products,id',
-            'quantity' => 'required|integer|min:1',
-            'price_per_item' => 'required|integer|min:0',
-        ]);
-
-        $orderItem->update($validated);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Order item berhasil diperbarui.',
-            'data' => $orderItem
-        ]);
     }
 
     /**
@@ -97,20 +135,30 @@ class OrderItemController extends Controller
      */
     public function destroy($id)
     {
-        $orderItem = OrderItemModel::find($id);
+        try {
+            $orderItem = OrderItemModel::find($id);
 
-        if (!$orderItem) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Order item tidak ditemukan.'
-            ], 404);
+            if (!$orderItem) {
+                return ApiFormatter::createJson(
+                    404,
+                    'Not Found',
+                    'Order item tidak ditemukan.'
+                );
+            }
+
+            $orderItem->delete();
+
+            return ApiFormatter::createJson(
+                200,
+                'Order item berhasil dihapus.',
+                null
+            );
+        } catch (Throwable $e) {
+            return ApiFormatter::createJson(
+                500,
+                'Internal Server Error',
+                ['error' => $e->getMessage()]
+            );
         }
-
-        $orderItem->delete();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Order item berhasil dihapus.'
-        ]);
     }
 }
