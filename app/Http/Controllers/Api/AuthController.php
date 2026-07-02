@@ -19,6 +19,44 @@ use App\Models\User;
 
 class AuthController extends Controller
 {
+    public function register(Request $request)
+    {
+        try {
+            $params = $request->all();
+
+            $validator = Validator::make($params,
+                [
+                    'name'          => 'required|string|max:255',
+                    'email'         => 'required|email|unique:users,email',
+                    'password'      => 'required|min:6',
+                ],
+                [
+                    'name.required'         => 'Name is required',
+                    'email.required'        => 'Email is required',
+                    'email.email'           => 'Email must be a valid email address',
+                    'email.unique'          => 'Email is already registered',
+                    'password.required'     => 'Password is required',
+                    'password.min'          => 'Password must be at least :min characters',
+                ]
+            );
+
+            if ($validator->fails()) {
+                return response()->json(ApiFormatter::createJson(400, 'Bad request', $validator->errors()->all()), 400);
+            }
+
+            $user = User::create([
+                'name'      => $params['name'],
+                'email'     => $params['email'],
+                'password'  => Hash::make($params['password']),
+                'role'      => 'customer'
+            ]);
+
+            return response()->json(ApiFormatter::createJson(201, 'User registered successfully', $user), 201);
+        } catch (\Exception $e) {
+            return response()->json(ApiFormatter::createJson(500, 'Internal Server Error', ['error' => $e->getMessage()]), 500);
+        }
+    }
+
     public function login(Request $request)
     {
         try {
