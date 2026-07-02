@@ -73,6 +73,8 @@ Route::middleware('auth:api')->group(function () {
         // Route::put('/{id}', [OrderItemsController::class, 'update']);
         // Route::patch('/{id}', [OrderItemsController::class, 'patch']);
         // Route::delete('/{id}', [OrderItemsController::class, 'destroy']);
+
+        Route::get('/orders/{id}/items', [OrderItemsController::class, 'byOrder']);
     });
 
 });
